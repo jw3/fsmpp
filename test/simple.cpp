@@ -15,7 +15,6 @@ struct S : public State
  */
 struct C : public Config
 {
-   bool enabled;
    int count = 5;
 };
 
