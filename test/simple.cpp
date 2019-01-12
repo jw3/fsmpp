@@ -7,7 +7,7 @@
  */
 struct S : public State
 {
-   int val;
+   int val = 0;
 };
 
 /**
@@ -16,12 +16,13 @@ struct S : public State
 struct C : public Config
 {
    bool enabled;
+   int count = 5;
 };
 
 /**
  * define your types
  */
-using StateRef = const S&;
+using StateRef = S&;
 using ConfigRef = const C&;
 using B = Behavior<C, S>;
 using OptB = std::shared_ptr<B>;
@@ -50,8 +51,9 @@ struct Three : public B
 struct Two : public B
 {
    OptB operator()(StateRef s) override {
-      std::cout << "in Two" << std::endl;
-      return become<Three>();
+      auto remaining = cfg().count - ++s.val;
+      std::cout << "in Two, I loop " << remaining << " more times" << std::endl;
+      return remaining ? remain() : become<Three>();
    };
 };
 
@@ -93,3 +95,17 @@ int main(int c, char** v) {
 
    return 0;
 }
+
+/*
+entering main
+starting
+in One
+in Two, I loop 4 more times
+in Two, I loop 3 more times
+in Two, I loop 2 more times
+in Two, I loop 1 more times
+in Two, I loop 0 more times
+in Three
+stopping
+leaving main
+ */

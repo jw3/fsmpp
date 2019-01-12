@@ -8,12 +8,12 @@ struct Config {};
 
 constexpr auto End = nullptr;
 
-template<typename C = Config, typename S = State>
-struct Behavior
+template<typename C, typename S>
+struct Behavior : std::enable_shared_from_this<Behavior<C, S>>
 {
    using OptBehavior = std::shared_ptr<Behavior<C, S>>;
 
-   virtual OptBehavior operator()(const S&) = 0;
+   virtual OptBehavior operator()(S&) = 0;
 
    virtual void enter() {}
    virtual void exit() {}
@@ -28,8 +28,7 @@ struct Behavior
    }
 
    OptBehavior remain() {
-      auto T = std::remove_reference<decltype(*this)>::type;
-      return std::make_shared<T>();
+      return this->shared_from_this();
    }
 
 protected:
@@ -38,8 +37,8 @@ protected:
       assert(config);
       return *config;
    }
-   void cfg(const C&) {}
+   void cfg(const C& c) { config = &c; }
 
 private:
-   C* config = nullptr;
+   const C* config = nullptr;
 };
