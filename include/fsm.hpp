@@ -1,36 +1,35 @@
 #pragma once
 
+#include <memory>
 #include <cassert>
-#include <experimental/optional>
 
 struct State {};
 struct Config {};
 
-constexpr auto End = std::experimental::nullopt;
+constexpr auto End = nullptr;
 
 template<typename C = Config, typename S = State>
 struct Behavior
 {
-   using OptBehavior = std::experimental::optional<Behavior<C, S>>;
+   using OptBehavior = std::shared_ptr<Behavior<C, S>>;
 
-   virtual OptBehavior operator()(const S&) {
-      return End;
-   };
+   virtual OptBehavior operator()(const S&) = 0;
 
    virtual void enter() {}
    virtual void exit() {}
 
    template<class T, class... A>
    OptBehavior become(A&& ... args) {
-      T t(std::forward<A>(args)...);
-      t.cfg(*config);
+      OptBehavior t = std::make_shared<T>(std::forward<A>(args)...);
+      t->cfg(*config);
       exit();
-      t.enter();
-      return std::move(t);
+      t->enter();
+      return t;
    }
 
    OptBehavior remain() {
-      return std::experimental::make_optional(this);
+      auto T = std::remove_reference<decltype(*this)>::type;
+      return std::make_shared<T>();
    }
 
 protected:

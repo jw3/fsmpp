@@ -24,7 +24,7 @@ struct C : public Config
 using StateRef = const S&;
 using ConfigRef = const C&;
 using B = Behavior<C, S>;
-using OptB = std::experimental::optional<B>;
+using OptB = std::shared_ptr<B>;
 
 
 /**
@@ -34,6 +34,7 @@ using OptB = std::experimental::optional<B>;
 struct Stop : public B
 {
    OptB operator()(StateRef s) override {
+      std::cout << "stopping" << std::endl;
       return End;
    }
 };
@@ -42,7 +43,7 @@ struct Three : public B
 {
    OptB operator()(StateRef s) override {
       std::cout << "in Three" << std::endl;
-      return Stop();
+      return become<Stop>();
    };
 };
 
@@ -50,7 +51,7 @@ struct Two : public B
 {
    OptB operator()(StateRef s) override {
       std::cout << "in Two" << std::endl;
-      return Three();
+      return become<Three>();
    };
 };
 
@@ -58,7 +59,7 @@ struct One : public B
 {
    OptB operator()(StateRef s) override {
       std::cout << "in One" << std::endl;
-      return Two();
+      return become<Two>();
    };
 };
 
@@ -69,23 +70,26 @@ struct Start : public B
 {
    explicit Start(const C& c) { cfg(c); }
    OptB operator()(StateRef) override {
-      std::cout << "in Start" << std::endl;
-      return One();
+      std::cout << "starting" << std::endl;
+      return become<One>();
    }
 };
 
 
 int main(int c, char** v) {
-   std::cout << "in main" << std::endl;
+   std::cout << "entering main" << std::endl;
 
    C cfg;
    S state;
-   OptB current = std::experimental::make_optional(Start(cfg));
+
+   OptB current = std::make_shared<Start>(cfg);
 
    while(current) {
-      auto f = *current;
+      auto& f = *current;
       current = f(state);
    }
+
+   std::cout << "leaving main" << std::endl;
 
    return 0;
 }
