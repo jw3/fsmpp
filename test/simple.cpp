@@ -3,6 +3,24 @@
 #include <iostream>
 
 /**
+ * Produces:
+      entering main
+      starting
+      in One
+      in Two, I loop
+         loop: 1
+         loop: 2
+         loop: 3
+         loop: 4
+         loop: 5
+      leaving Two, done looping
+      in Three
+      stopping
+      leaving main
+ *
+ */
+
+/**
  * define your state object
  */
 struct S : public State
@@ -102,19 +120,3 @@ int main(int c, char** v) {
 
    return 0;
 }
-
-/*
-entering main
-starting
-in One
-in Two, I loop
-	loop: 1
-	loop: 2
-	loop: 3
-	loop: 4
-	loop: 5
-leaving Two, done looping
-in Three
-stopping
-leaving main
- */
