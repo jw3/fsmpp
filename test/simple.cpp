@@ -49,11 +49,19 @@ struct Three : public B
 
 struct Two : public B
 {
+   void enter() override {
+      std::cout << "in Two, I loop" << std::endl;
+   }
+
    OptB operator()(StateRef s) override {
       auto remaining = cfg().count - ++s.val;
-      std::cout << "in Two, I loop " << remaining << " more times" << std::endl;
+      std::cout << "\tloop: " << s.val << std::endl;
       return remaining ? remain() : become<Three>();
    };
+
+   void exit() override {
+      std::cout << "leaving Two, done looping" << std::endl;
+   }
 };
 
 struct One : public B
@@ -99,11 +107,13 @@ int main(int c, char** v) {
 entering main
 starting
 in One
-in Two, I loop 4 more times
-in Two, I loop 3 more times
-in Two, I loop 2 more times
-in Two, I loop 1 more times
-in Two, I loop 0 more times
+in Two, I loop
+	loop: 1
+	loop: 2
+	loop: 3
+	loop: 4
+	loop: 5
+leaving Two, done looping
 in Three
 stopping
 leaving main
