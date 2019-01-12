@@ -8,7 +8,7 @@ struct Config {};
 
 constexpr auto End = nullptr;
 
-template<typename C, typename S>
+template<typename C = Config, typename S = State>
 struct Behavior : std::enable_shared_from_this<Behavior<C, S>>
 {
    using OptBehavior = std::shared_ptr<Behavior<C, S>>;
