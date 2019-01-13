@@ -16,12 +16,12 @@
       leaving Two, done looping
       in Three
       stopping
-      leaving main
+      leaving main, looped 5x
  *
  */
 
 /**
- * define your state object
+ * define state type
  */
 struct S : public State
 {
@@ -29,7 +29,7 @@ struct S : public State
 };
 
 /**
- * define your config object
+ * define config type
  */
 struct C : public Config
 {
@@ -37,7 +37,7 @@ struct C : public Config
 };
 
 /**
- * define your types
+ * declare type aliases
  */
 using StateRef = S&;
 using ConfigRef = const C&;
@@ -46,7 +46,7 @@ using OptB = std::shared_ptr<B>;
 
 
 /**
- * define your states
+ * implement states
  */
 
 struct Stop : public B
@@ -91,7 +91,7 @@ struct One : public B
 };
 
 /**
- * create the entrypoint to the state machine
+ * create an entrypoint
  */
 struct Start : public B
 {
@@ -116,7 +116,7 @@ int main(int c, char** v) {
       current = f(state);
    }
 
-   std::cout << "leaving main" << std::endl;
+   std::cout << "leaving main, looped " << state.val << "x" << std::endl;
 
    return 0;
 }
