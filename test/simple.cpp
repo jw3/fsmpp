@@ -107,14 +107,15 @@ int main(int c, char** v) {
    std::cout << "entering main" << std::endl;
 
    C cfg;
-   S state;
 
    OptB current = std::make_shared<Start>(cfg);
 
    while(current) {
       auto& f = *current;
-      current = f(state);
+      current = f();
    }
+
+
 
    std::cout << "leaving main, looped " << state.val << "x" << std::endl;
 

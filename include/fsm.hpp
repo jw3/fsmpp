@@ -3,28 +3,35 @@
 #include <memory>
 #include <cassert>
 
+struct Event {};
 struct State {};
 struct Config {};
 
 constexpr auto End = nullptr;
+using AnyE = const Event&;
+constexpr Event EmptyE;
 
-template<typename C = Config, typename S = State>
-struct Behavior : std::enable_shared_from_this<Behavior<C, S>>
+template<typename C = Config, typename S = State, typename E = Event>
+struct Behavior : std::enable_shared_from_this<Behavior<C, S, E>>
 {
-   using OptBehavior = std::shared_ptr<Behavior<C, S>>;
+   using OptBehavior = std::shared_ptr<Behavior<C, S, E>>;
 
-   virtual OptBehavior operator()(S&) = 0;
+   virtual OptBehavior operator()(const E&) = 0;
+
+   OptBehavior operator()() {
+      return operator()(EmptyE);
+   }
 
    virtual void enter() {}
    virtual void exit() {}
 
-   template<class T, class... A>
+   template<typename T, typename ... A>
    OptBehavior become(A&& ... args) {
-      OptBehavior t = std::make_shared<T>(std::forward<A>(args)...);
-      t->cfg(*config);
-      exit();
-      t->enter();
-      return t;
+      OptBehavior next = std::make_shared<T>(std::forward<A>(args)...);
+      next->config = config;
+      this->exit();
+      next->enter();
+      return next;
    }
 
    OptBehavior remain() {
@@ -33,11 +40,8 @@ struct Behavior : std::enable_shared_from_this<Behavior<C, S>>
 
 protected:
    Behavior() = default;
-   const C& cfg() {
-      assert(config);
-      return *config;
-   }
-   void cfg(const C& c) { config = &c; }
+   Behavior(const C& c) : config(&c) {}
+   const C* cfg() { return *config; }
 
 private:
    const C* config = nullptr;
